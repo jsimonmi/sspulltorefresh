@@ -21,6 +21,7 @@
 @implementation SSPullToRefreshView {
 	dispatch_semaphore_t _animationSemaphore;
 	CGFloat _topInset;
+    BOOL _updatingContentInset;
 }
 
 @synthesize delegate = _delegate;
@@ -65,13 +66,16 @@
 	void *context = (__bridge void *)self;
 	if ([_scrollView respondsToSelector:@selector(removeObserver:forKeyPath:context:)]) {
 		[_scrollView removeObserver:self forKeyPath:@"contentOffset" context:context];
+        [_scrollView removeObserver:self forKeyPath:@"contentInset" context:context];
 	} else if (_scrollView) {
 		[_scrollView removeObserver:self forKeyPath:@"contentOffset"];
+        [_scrollView removeObserver:self forKeyPath:@"contentInset"];
 	}
 	
 	_scrollView = scrollView;	
 	_defaultContentInset = _scrollView.contentInset;
 	[_scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:context];
+	[_scrollView addObserver:self forKeyPath:@"contentInset" options:NSKeyValueObservingOptionNew context:context];
 }
 
 
@@ -220,7 +224,9 @@
 	}
 	
 	// Update the content inset
+    _updatingContentInset = YES;
 	_scrollView.contentInset = inset;
+    _updatingContentInset = NO;
 }
 
 
@@ -267,6 +273,14 @@
 		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 		return;
 	}
+
+    if ([keyPath isEqualToString:@"contentInset"] && !_updatingContentInset) {
+        UIEdgeInsets insets = [(NSValue *)[change valueForKey:NSKeyValueChangeNewKey] UIEdgeInsetsValue];
+        if (self.expanded) {
+            insets.top -= self.expandedHeight;
+        }
+        _defaultContentInset = insets;
+    }
 	
 	// We don't care about this notificaiton
 	if (object != _scrollView || ![keyPath isEqualToString:@"contentOffset"]) {
