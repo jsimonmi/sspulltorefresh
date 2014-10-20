@@ -4,7 +4,7 @@ Pod::Spec.new do |s|
   s.summary   = 'Simple and highly customizable pull to refresh view.'
   s.homepage  = 'https://github.com/jsimonmi/sspulltorefresh'
   s.author    = { 'Sam Soffes' => 'sam@samsoff.es' }
-  s.source    = { :git => 'https://github.com/jsimonmi/sspulltorefresh.git', :commit => '20c077253d1d3b08f5eddc517cc5cf951df8ea63' }
+  s.source    = { :git => 'https://github.com/jsimonmi/sspulltorefresh.git' }
   s.license   = {
     :type => 'MIT',
     :file => 'LICENSE'
